@@ -22,7 +22,7 @@ st.set_page_config(
     page_title="采姸 CHAI YAN｜廣告報表",
     page_icon="📊",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 # ─── GLOBAL CSS ───────────────────────────────────────────────────────────────
@@ -109,6 +109,26 @@ st.markdown("""<style>
 
 [data-testid="stDataFrame"] { border-radius: 10px; overflow: hidden; }
 [data-testid="stPlotlyChart"] { margin: 0 !important; }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+    [data-testid="stSidebar"],
+    [data-testid="collapsedControl"],
+    section[data-testid="stSidebarCollapsedControl"] { display: none !important; }
+    .main .block-container { padding: 0.5rem 0.75rem 2rem !important; }
+    .sec-hd { font-size: 16px !important; margin: 12px 0 10px !important; }
+    .stTabs [data-baseweb="tab"] { font-size: 14px !important; padding: 8px 16px !important; }
+    /* Header banner */
+    .main-hd { flex-direction: column !important; padding: 1rem !important;
+                margin: 0 -0.75rem 1rem !important; gap: 10px !important; }
+    .hd-logo  { height: 48px !important; width: 48px !important; }
+    .hd-title { font-size: 1.25rem !important; line-height: 1.2 !important; }
+    .hd-sub   { font-size: 11px !important; }
+    .hd-note  { font-size: 11px !important; margin-top: 4px !important; }
+    .hd-date  { text-align: left !important; margin-top: 0 !important; }
+    .hd-date-main { font-size: 13px !important; font-weight: 600 !important; }
+    .hd-date-vs   { font-size: 11px !important; }
+}
 </style>""", unsafe_allow_html=True)
 
 st.markdown("""<style>
@@ -125,17 +145,6 @@ st.markdown("""<style>
 }
 </style>""", unsafe_allow_html=True)
 
-# ─── MOBILE CSS ───────────────────────────────────────────────────────────────
-st.markdown("""<style>
-@media (max-width: 768px) {
-    .main .block-container { padding: 0.5rem 0.5rem 2rem !important; }
-    .sec-hd { font-size: 16px !important; }
-    [data-testid="stSidebar"] { min-width: 80vw !important; max-width: 90vw !important; }
-    [data-testid="stDataFrame"] tbody td { font-size: 12px !important; }
-    [data-testid="stDataFrame"] thead tr th { font-size: 13px !important; }
-    .stTabs [data-baseweb="tab"] { font-size: 14px !important; padding: 8px 14px !important; }
-}
-</style>""", unsafe_allow_html=True)
 
 
 try:
@@ -388,6 +397,7 @@ def kpi_html(cards, cols=7, card_bg="#FFFDF8"):
         )
     return f"""<!DOCTYPE html><html><head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 *{{box-sizing:border-box;margin:0;padding:0}}
 body{{background:transparent;font-family:"PingFang TC","PingFang SC",-apple-system,BlinkMacSystemFont,sans-serif}}
@@ -401,8 +411,27 @@ body{{background:transparent;font-family:"PingFang TC","PingFang SC",-apple-syst
       margin-bottom:7px;white-space:nowrap}}
 .badge{{display:inline-block;font-size:12px;font-weight:600;
         border-radius:6px;padding:4px 8px;white-space:nowrap}}
+@media(max-width:480px){{
+  .g{{grid-template-columns:repeat(2,1fr)!important;gap:8px!important}}
+  .card{{padding:10px 10px 9px!important;border-radius:10px!important}}
+  .lbl{{font-size:11px!important;margin-bottom:4px!important}}
+  .val{{font-size:18px!important;margin-bottom:4px!important}}
+  .badge{{font-size:10px!important;padding:2px 6px!important}}
+}}
 </style></head>
-<body><div class="g">{divs}</div></body></html>"""
+<body><div class="g">{divs}</div>
+<script>
+(function(){{
+  function sendH(){{
+    var h=document.body.scrollHeight;
+    window.parent.postMessage({{isStreamlitMessage:true,type:'streamlit:setFrameHeight',height:h}},'*');
+  }}
+  if(document.readyState==='loading'){{document.addEventListener('DOMContentLoaded',sendH);}}else{{sendH();}}
+  window.addEventListener('resize',function(){{setTimeout(sendH,80);}});
+  setTimeout(sendH,250);
+}})();
+</script>
+</body></html>"""
 
 # ─── SPEND MINI CARD (lighter sky blue) ──────────────────────────────────────
 def spend_mini_html(spend, chg):
@@ -924,29 +953,29 @@ with st.sidebar:
 # MAIN HEADER — 灰色漸層 + 中文標題 + 品牌 Logo
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown(f'''
-<div style="background:linear-gradient(135deg,#4B5563 0%,#6B7280 50%,#9CA3AF 100%);
+<div class="main-hd" style="background:linear-gradient(135deg,#4B5563 0%,#6B7280 50%,#9CA3AF 100%);
             padding:1.8rem 2.2rem 2rem;margin:0 -2rem 1.8rem;
             display:flex;align-items:center;gap:28px">
-  <img src="data:image/webp;base64,{LOGO_B64}"
+  <img class="hd-logo" src="data:image/webp;base64,{LOGO_B64}"
        style="height:80px;width:80px;object-fit:contain;border-radius:50%;
               background:#FFFDF8;padding:7px;flex-shrink:0;
               box-shadow:0 2px 12px rgba(0,0,0,.20)"/>
-  <div style="flex:1">
-    <div style="color:rgba(255,255,255,.75);font-size:13px;font-weight:700;
+  <div style="flex:1;min-width:0">
+    <div class="hd-sub" style="color:rgba(255,255,255,.75);font-size:13px;font-weight:700;
                 text-transform:uppercase;letter-spacing:.12em;margin-bottom:7px">
       采姸服飾 · 廣告數據報表系統
     </div>
-    <div style="color:#fff;font-size:2rem;font-weight:900;letter-spacing:-.025em;line-height:1.1;
-                text-shadow:0 1px 3px rgba(0,0,0,.20)">
+    <div class="hd-title" style="color:#fff;font-size:2rem;font-weight:900;letter-spacing:-.025em;line-height:1.1;
+                text-shadow:0 1px 3px rgba(0,0,0,.20);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
       采姸服裝 Meta 廣告數據總覽
     </div>
-    <div style="color:rgba(255,255,255,.75);font-size:14px;margin-top:7px">
+    <div class="hd-note" style="color:rgba(255,255,255,.75);font-size:14px;margin-top:7px">
       Meta Marketing API v21.0 × Google Analytics 4 · 每 30 分鐘自動刷新
     </div>
   </div>
-  <div style="text-align:right;flex-shrink:0">
-    <div style="color:#fff;font-size:16px;font-weight:700">{since} ～ {until}</div>
-    <div style="color:rgba(255,255,255,.7);font-size:13px;margin-top:4px">vs {compare_since} ～ {compare_until}</div>
+  <div class="hd-date" style="text-align:right;flex-shrink:0">
+    <div class="hd-date-main" style="color:#fff;font-size:16px;font-weight:700">{since} ～ {until}</div>
+    <div class="hd-date-vs" style="color:rgba(255,255,255,.7);font-size:13px;margin-top:4px">vs {compare_since} ～ {compare_until}</div>
   </div>
 </div>
 ''', unsafe_allow_html=True)
@@ -1033,7 +1062,7 @@ with tab_meta:
              delta=tm.get("clicks_chg"),            color=C["clicks"]),
         dict(label="點閱率",        value=f"{tm['ctr']:.2f}%",
              delta=tm.get("ctr_chg"),               color=C["ctr"]),
-    ], cols=6), height=155, scrolling=False)
+    ], cols=6), height=500, scrolling=False)
     st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
     # 流量指標（第二排 5 項 + 廣告花費藍卡）
     components.html(kpi_html([
@@ -1049,7 +1078,7 @@ with tab_meta:
              delta=_cpl_chg,                        color=C["cpc"],       inverse=True),
         dict(label="廣告花費",      value=f"${tm['spend']:,.0f}",
              delta=tm.get("spend_chg"),             spend_card=True),
-    ], cols=6), height=155, scrolling=False)
+    ], cols=6), height=500, scrolling=False)
 
     st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
 
@@ -1072,7 +1101,7 @@ with tab_meta:
              delta=tm.get("avg_order_value_chg"),   color=C["aov"]),
         dict(label="每單成本 CPA",  value=f"${tm['cpa']:.2f}" if tm["cpa"] > 0 else "—",
              delta=tm.get("cpa_chg"),               color=C["cpa"],       inverse=True),
-    ], cols=8), height=155, scrolling=False)
+    ], cols=8), height=500, scrolling=False)
 
     st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
 
@@ -1089,7 +1118,7 @@ with tab_meta:
              delta=cart_ab_chg,                     color=C["abandon"],   inverse=True),
         dict(label="結帳放棄率",    value=f"{checkout_ab:.1f}%",
              delta=chk_ab_chg,                      color=C["abandon"],   inverse=True),
-    ], cols=5), height=155, scrolling=False)
+    ], cols=5), height=500, scrolling=False)
 
     st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
     st.divider()
@@ -1444,7 +1473,7 @@ with tab_ga4:
         dict(label="跳出率",     value=f"{gs.get('bounce_rate', 0):.1f}%",
              delta=_chg_delta(gs.get("bounce_rate", 0), gcs.get("bounce_rate")),
              color="#DC2626", inverse=True),
-    ], cols=7, card_bg="#FFFDF8"), height=155, scrolling=False)
+    ], cols=7, card_bg="#FFFDF8"), height=500, scrolling=False)
 
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
 
