@@ -1,0 +1,23 @@
+# 憑證與設定（不能上傳 GitHub）
+config/meta_ads.json
+config/google_ads.yaml
+config/ga4.json
+config/google_ads_session.json
+config/google_ads_accounts.json
+config/ga4_ads_mapping.json
+.streamlit/secrets.toml
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Logs
+*.log
+
+# Playwright
+.playwright-mcp/
