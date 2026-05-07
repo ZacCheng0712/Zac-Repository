@@ -128,6 +128,11 @@ st.markdown("""<style>
     .hd-date  { text-align: left !important; margin-top: 0 !important; }
     .hd-date-main { font-size: 13px !important; font-weight: 600 !important; }
     .hd-date-vs   { font-size: 11px !important; }
+    /* GA4 orange banner */
+    .ga4-hd { flex-direction: column !important; align-items: flex-start !important;
+               padding: 14px 16px !important; gap: 6px !important; }
+    .ga4-hd-title { font-size: 1.1rem !important; }
+    .ga4-hd-date  { text-align: left !important; font-size: 12px !important; }
 }
 </style>""", unsafe_allow_html=True)
 
@@ -422,13 +427,27 @@ body{{background:transparent;font-family:"PingFang TC","PingFang SC",-apple-syst
 <body><div class="g">{divs}</div>
 <script>
 (function(){{
-  function sendH(){{
-    var h=document.body.scrollHeight;
-    window.parent.postMessage({{isStreamlitMessage:true,type:'streamlit:setFrameHeight',height:h}},'*');
+  function resize(){{
+    var h=document.body.scrollHeight+6;
+    var done=false;
+    if(window.frameElement){{
+      window.frameElement.style.height=h+'px';
+      done=true;
+    }}
+    if(!done){{
+      try{{
+        var fs=window.parent.document.querySelectorAll('iframe');
+        for(var i=0;i<fs.length;i++){{
+          try{{if(fs[i].contentWindow===window){{fs[i].style.height=h+'px';done=true;break;}}}}catch(e){{}}
+        }}
+      }}catch(e){{}}
+    }}
   }}
-  if(document.readyState==='loading'){{document.addEventListener('DOMContentLoaded',sendH);}}else{{sendH();}}
-  window.addEventListener('resize',function(){{setTimeout(sendH,80);}});
-  setTimeout(sendH,250);
+  if(document.readyState!=='loading'){{resize();}}
+  else{{document.addEventListener('DOMContentLoaded',resize);}}
+  window.addEventListener('resize',function(){{setTimeout(resize,80);}});
+  setTimeout(resize,80);
+  setTimeout(resize,350);
 }})();
 </script>
 </body></html>"""
@@ -1062,7 +1081,7 @@ with tab_meta:
              delta=tm.get("clicks_chg"),            color=C["clicks"]),
         dict(label="點閱率",        value=f"{tm['ctr']:.2f}%",
              delta=tm.get("ctr_chg"),               color=C["ctr"]),
-    ], cols=6), height=500, scrolling=False)
+    ], cols=6), height=160, scrolling=False)
     st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
     # 流量指標（第二排 5 項 + 廣告花費藍卡）
     components.html(kpi_html([
@@ -1078,7 +1097,7 @@ with tab_meta:
              delta=_cpl_chg,                        color=C["cpc"],       inverse=True),
         dict(label="廣告花費",      value=f"${tm['spend']:,.0f}",
              delta=tm.get("spend_chg"),             spend_card=True),
-    ], cols=6), height=500, scrolling=False)
+    ], cols=6), height=160, scrolling=False)
 
     st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
 
@@ -1101,7 +1120,7 @@ with tab_meta:
              delta=tm.get("avg_order_value_chg"),   color=C["aov"]),
         dict(label="每單成本 CPA",  value=f"${tm['cpa']:.2f}" if tm["cpa"] > 0 else "—",
              delta=tm.get("cpa_chg"),               color=C["cpa"],       inverse=True),
-    ], cols=8), height=500, scrolling=False)
+    ], cols=8), height=160, scrolling=False)
 
     st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
 
@@ -1118,7 +1137,7 @@ with tab_meta:
              delta=cart_ab_chg,                     color=C["abandon"],   inverse=True),
         dict(label="結帳放棄率",    value=f"{checkout_ab:.1f}%",
              delta=chk_ab_chg,                      color=C["abandon"],   inverse=True),
-    ], cols=5), height=500, scrolling=False)
+    ], cols=5), height=160, scrolling=False)
 
     st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
     st.divider()
@@ -1439,17 +1458,17 @@ with tab_ga4:
     gcs = ga4_data.get("compare_summary", {})
 
     st.markdown(f'''
-<div style="background:linear-gradient(135deg,#B45309 0%,{GA4_PRIMARY} 60%,{GA4_AMBER} 100%);
+<div class="ga4-hd" style="background:linear-gradient(135deg,#B45309 0%,{GA4_PRIMARY} 60%,{GA4_AMBER} 100%);
             border-radius:14px;padding:18px 24px;margin-bottom:16px;
-            display:flex;align-items:center;justify-content:space-between">
-  <div>
+            display:flex;align-items:center;justify-content:space-between;gap:12px">
+  <div style="min-width:0">
     <div style="color:rgba(255,255,255,.7);font-size:10px;font-weight:700;
-                text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px">
+                text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px;white-space:nowrap">
       Google Analytics 4 · 網站流量分析
     </div>
-    <div style="color:#fff;font-size:1.4rem;font-weight:900;line-height:1.1">網站流量 × 用戶行為</div>
+    <div class="ga4-hd-title" style="color:#fff;font-size:1.4rem;font-weight:900;line-height:1.1;white-space:nowrap">網站流量 × 用戶行為</div>
   </div>
-  <div style="text-align:right;color:rgba(255,255,255,.8);font-size:13px">{since} ～ {until}</div>
+  <div class="ga4-hd-date" style="text-align:right;color:rgba(255,255,255,.85);font-size:13px;flex-shrink:0;white-space:nowrap">{since} ～ {until}</div>
 </div>
 ''', unsafe_allow_html=True)
 
@@ -1473,7 +1492,7 @@ with tab_ga4:
         dict(label="跳出率",     value=f"{gs.get('bounce_rate', 0):.1f}%",
              delta=_chg_delta(gs.get("bounce_rate", 0), gcs.get("bounce_rate")),
              color="#DC2626", inverse=True),
-    ], cols=7, card_bg="#FFFDF8"), height=500, scrolling=False)
+    ], cols=7, card_bg="#FFFDF8"), height=160, scrolling=False)
 
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
 
