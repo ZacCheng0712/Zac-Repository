@@ -587,9 +587,11 @@ _dp_html  = """<!DOCTYPE html><html><head><meta charset='utf-8'>
 body{background:transparent;overflow:visible}
 #dp-btn{display:inline-flex;align-items:center;gap:10px;padding:9px 18px;background:#fff;
   border:1.5px solid #C8B99A;border-radius:8px;cursor:pointer;font-size:15px;color:#2D1F0F;
-  font-weight:600;white-space:nowrap;height:46px;justify-content:space-between;width:100%;
+  font-weight:600;white-space:nowrap;height:46px;justify-content:space-between;
+  width:100%;max-width:380px;
   box-shadow:0 1px 4px rgba(0,0,0,.08);}
 #dp-btn:hover{background:#FAF4EB;border-color:#A08060}
+@media(max-width:900px){#dp-btn{max-width:100%;}}
 </style></head><body>
 <div id='dp-btn'>
   <span>&#128197;</span>
@@ -856,9 +858,7 @@ _dp_html = (_dp_html
 )
 
 # 4. 渲染：日曆選擇器
-_dp_col, _ = st.columns([1.7, 6.45])
-with _dp_col:
-    components.html(_dp_html, height=50, scrolling=False)
+components.html(_dp_html, height=50, scrolling=False)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SIDEBAR（品牌資訊 + 刷新）
