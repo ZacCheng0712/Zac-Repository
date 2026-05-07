@@ -110,6 +110,20 @@ st.markdown("""<style>
 [data-testid="stDataFrame"] { border-radius: 10px; overflow: hidden; }
 [data-testid="stPlotlyChart"] { margin: 0 !important; }
 
+/* KPI Cards */
+.kpi-grid { display:grid; gap:12px; padding:2px 0; margin-bottom:8px; }
+.kpi-card { border-radius:14px; padding:16px 14px 13px;
+            font-family:"PingFang TC","PingFang SC",-apple-system,BlinkMacSystemFont,sans-serif;
+            transition:transform .18s ease,box-shadow .18s ease; cursor:default; }
+.kpi-card:hover { transform:translateY(-3px); box-shadow:0 8px 28px rgba(0,0,0,.12)!important; }
+.kpi-lbl { font-size:14px; font-weight:700; color:#8B7355; margin-bottom:7px;
+            display:flex; align-items:center; white-space:nowrap;
+            overflow:hidden; text-overflow:ellipsis; }
+.kpi-val { font-size:26px; font-weight:800; color:#374151; letter-spacing:-.02em;
+            margin-bottom:7px; white-space:nowrap; }
+.kpi-bdg { display:inline-block; font-size:12px; font-weight:600;
+            border-radius:6px; padding:4px 8px; white-space:nowrap; }
+
 /* ── Mobile ── */
 @media (max-width: 768px) {
     [data-testid="stSidebar"],
@@ -128,6 +142,12 @@ st.markdown("""<style>
     .hd-date  { text-align: left !important; margin-top: 0 !important; }
     .hd-date-main { font-size: 13px !important; font-weight: 600 !important; }
     .hd-date-vs   { font-size: 11px !important; }
+    /* KPI cards 2-col on mobile */
+    .kpi-grid { grid-template-columns: repeat(2,1fr) !important; gap:8px !important; }
+    .kpi-card { padding:10px 10px 9px !important; border-radius:10px !important; }
+    .kpi-lbl  { font-size:11px !important; margin-bottom:4px !important; }
+    .kpi-val  { font-size:18px !important; margin-bottom:4px !important; }
+    .kpi-bdg  { font-size:10px !important; padding:2px 6px !important; }
     /* GA4 orange banner */
     .ga4-hd { flex-direction: column !important; align-items: flex-start !important;
                padding: 14px 16px !important; gap: 6px !important; }
@@ -355,27 +375,26 @@ def kpi_html(cards, cols=7, card_bg="#FFFDF8"):
     for c in cards:
         dv  = c.get("delta")
         inv = c.get("inverse", False)
-        # 特殊卡（藍底漸層，如廣告花費）
         if c.get("spend_card"):
             arr  = "▲" if (dv or 0) > 0 else "▼"
             good = (dv or 0) > 0
             bdg_color = "#A7F3D0" if good else "#FCD34D"
             badge = (
-                f'<span class="badge" style="background:rgba(255,255,255,0.15);color:{bdg_color}">'
+                f'<span class="kpi-bdg" style="background:rgba(255,255,255,0.15);color:{bdg_color}">'
                 f'{arr} {abs(dv or 0):.1f}% vs 上期</span>'
             ) if dv is not None else (
-                '<span class="badge" style="background:rgba(255,255,255,0.12);'
+                '<span class="kpi-bdg" style="background:rgba(255,255,255,0.12);'
                 'color:rgba(255,255,255,0.55)">— 無比較</span>'
             )
             divs += (
-                f'<div class="card" style="border-top:none;'
+                f'<div class="kpi-card" style="border-top:none;'
                 f'background:linear-gradient(135deg,#0369A1 0%,#0EA5E9 55%,#38BDF8 100%);'
                 f'box-shadow:0 4px 20px rgba(3,105,161,.35)">'
-                f'<div class="lbl" style="color:rgba(255,255,255,.75)">'
+                f'<div class="kpi-lbl" style="color:rgba(255,255,255,.75)">'
                 f'<span style="display:inline-block;width:6px;height:6px;border-radius:50%;'
                 f'background:rgba(255,255,255,.6);margin-right:5px;vertical-align:middle;flex-shrink:0"></span>'
                 f'{c["label"]}</div>'
-                f'<div class="val" style="color:#fff">{c["value"]}</div>'
+                f'<div class="kpi-val" style="color:#fff">{c["value"]}</div>'
                 f'{badge}</div>'
             )
             continue
@@ -383,74 +402,24 @@ def kpi_html(cards, cols=7, card_bg="#FFFDF8"):
             good  = (dv < 0) if inv else (dv > 0)
             dc    = "#059669" if good else "#DC2626"
             arr   = "▲" if dv > 0 else "▼"
-            badge = (
-                f'<span class="badge" style="background:{dc}18;color:{dc}">'
-                f'{arr} {abs(dv):.1f}% vs 上期</span>'
-            )
+            badge = f'<span class="kpi-bdg" style="background:{dc}18;color:{dc}">{arr} {abs(dv):.1f}% vs 上期</span>'
         else:
-            badge = '<span class="badge" style="background:#F0E5D018;color:#8B7355">— 無比較</span>'
+            badge = '<span class="kpi-bdg" style="background:#F0E5D018;color:#8B7355">— 無比較</span>'
         col = c.get("color", BRAND_BLUE)
         divs += (
-            f'<div class="card" style="border-top:3px solid {col};background:{card_bg};'
+            f'<div class="kpi-card" style="border-top:3px solid {col};background:{card_bg};'
             f'box-shadow:0 0 20px {col}28,0 2px 8px rgba(0,0,0,.05)">'
-            f'<div class="lbl">'
+            f'<div class="kpi-lbl">'
             f'<span style="display:inline-block;width:6px;height:6px;border-radius:50%;'
             f'background:{col};margin-right:5px;vertical-align:middle;flex-shrink:0"></span>'
             f'{c["label"]}</div>'
-            f'<div class="val">{c["value"]}</div>'
+            f'<div class="kpi-val">{c["value"]}</div>'
             f'{badge}</div>'
         )
-    return f"""<!DOCTYPE html><html><head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<style>
-*{{box-sizing:border-box;margin:0;padding:0}}
-body{{background:transparent;font-family:"PingFang TC","PingFang SC",-apple-system,BlinkMacSystemFont,sans-serif}}
-.g{{display:grid;grid-template-columns:repeat({cols},1fr);gap:12px;padding:2px 0}}
-.card{{border-radius:14px;padding:16px 14px 13px;
-       transition:transform .18s ease,box-shadow .18s ease;cursor:default}}
-.card:hover{{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.12)!important}}
-.lbl{{font-size:14px;font-weight:700;color:#8B7355;margin-bottom:7px;
-      display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
-.val{{font-size:26px;font-weight:800;color:#374151;letter-spacing:-.02em;
-      margin-bottom:7px;white-space:nowrap}}
-.badge{{display:inline-block;font-size:12px;font-weight:600;
-        border-radius:6px;padding:4px 8px;white-space:nowrap}}
-@media(max-width:480px){{
-  .g{{grid-template-columns:repeat(2,1fr)!important;gap:8px!important}}
-  .card{{padding:10px 10px 9px!important;border-radius:10px!important}}
-  .lbl{{font-size:11px!important;margin-bottom:4px!important}}
-  .val{{font-size:18px!important;margin-bottom:4px!important}}
-  .badge{{font-size:10px!important;padding:2px 6px!important}}
-}}
-</style></head>
-<body><div class="g">{divs}</div>
-<script>
-(function(){{
-  function resize(){{
-    var h=document.body.scrollHeight+6;
-    var done=false;
-    if(window.frameElement){{
-      window.frameElement.style.height=h+'px';
-      done=true;
-    }}
-    if(!done){{
-      try{{
-        var fs=window.parent.document.querySelectorAll('iframe');
-        for(var i=0;i<fs.length;i++){{
-          try{{if(fs[i].contentWindow===window){{fs[i].style.height=h+'px';done=true;break;}}}}catch(e){{}}
-        }}
-      }}catch(e){{}}
-    }}
-  }}
-  if(document.readyState!=='loading'){{resize();}}
-  else{{document.addEventListener('DOMContentLoaded',resize);}}
-  window.addEventListener('resize',function(){{setTimeout(resize,80);}});
-  setTimeout(resize,80);
-  setTimeout(resize,350);
-}})();
-</script>
-</body></html>"""
+    return (
+        f'<div class="kpi-grid" style="grid-template-columns:repeat({cols},1fr)">'
+        f'{divs}</div>'
+    )
 
 # ─── SPEND MINI CARD (lighter sky blue) ──────────────────────────────────────
 def spend_mini_html(spend, chg):
@@ -1068,7 +1037,7 @@ with tab_meta:
 
     # 流量指標（第一排 6 項）
     st.markdown('<div class="sec-hd">流量指標</div>', unsafe_allow_html=True)
-    components.html(kpi_html([
+    st.markdown(kpi_html([
         dict(label="曝光數",        value=f"{tm['impressions']:,}",
              delta=tm.get("impressions_chg"),       color=C["impressions"]),
         dict(label="觸及人數",      value=f"{tm['reach']:,}",
@@ -1081,10 +1050,10 @@ with tab_meta:
              delta=tm.get("clicks_chg"),            color=C["clicks"]),
         dict(label="點閱率",        value=f"{tm['ctr']:.2f}%",
              delta=tm.get("ctr_chg"),               color=C["ctr"]),
-    ], cols=6), height=160, scrolling=False)
+    ], cols=6), unsafe_allow_html=True)
     st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
     # 流量指標（第二排 5 項 + 廣告花費藍卡）
-    components.html(kpi_html([
+    st.markdown(kpi_html([
         dict(label="點擊成本",      value=f"${tm['cpc']:.2f}",
              delta=tm.get("cpc_chg"),               color=C["cpc"],       inverse=True),
         dict(label="連結點擊數",    value=f"{tm['link_clicks']:,}",
@@ -1097,13 +1066,13 @@ with tab_meta:
              delta=_cpl_chg,                        color=C["cpc"],       inverse=True),
         dict(label="廣告花費",      value=f"${tm['spend']:,.0f}",
              delta=tm.get("spend_chg"),             spend_card=True),
-    ], cols=6), height=160, scrolling=False)
+    ], cols=6), unsafe_allow_html=True)
 
     st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
 
     # 轉換指標
     st.markdown('<div class="sec-hd">轉換指標</div>', unsafe_allow_html=True)
-    components.html(kpi_html([
+    st.markdown(kpi_html([
         dict(label="加入購物車",    value=f"{tm['add_to_cart']:,}",
              delta=tm.get("add_to_cart_chg"),       color=C["cart"]),
         dict(label="開始結帳",      value=f"{tm['initiate_checkout']:,}",
@@ -1120,13 +1089,13 @@ with tab_meta:
              delta=tm.get("avg_order_value_chg"),   color=C["aov"]),
         dict(label="每單成本 CPA",  value=f"${tm['cpa']:.2f}" if tm["cpa"] > 0 else "—",
              delta=tm.get("cpa_chg"),               color=C["cpa"],       inverse=True),
-    ], cols=8), height=160, scrolling=False)
+    ], cols=8), unsafe_allow_html=True)
 
     st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
 
     # 購物旅程效率
     st.markdown('<div class="sec-hd">購物旅程效率</div>', unsafe_allow_html=True)
-    components.html(kpi_html([
+    st.markdown(kpi_html([
         dict(label="加購率",        value=f"{tm['add_to_cart_rate']:.2f}%",
              delta=tm.get("add_to_cart_rate_chg"),  color=C["atc_rate"]),
         dict(label="加購成本",      value=f"${tm.get('cpa_cart', 0):.2f}" if tm.get("cpa_cart", 0) > 0 else "—",
@@ -1137,7 +1106,7 @@ with tab_meta:
              delta=cart_ab_chg,                     color=C["abandon"],   inverse=True),
         dict(label="結帳放棄率",    value=f"{checkout_ab:.1f}%",
              delta=chk_ab_chg,                      color=C["abandon"],   inverse=True),
-    ], cols=5), height=160, scrolling=False)
+    ], cols=5), unsafe_allow_html=True)
 
     st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
     st.divider()
@@ -1476,7 +1445,7 @@ with tab_ga4:
     dur     = gs.get("avg_session_duration", 0)
     dur_fmt = f"{int(dur // 60)}:{int(dur % 60):02d}" if dur > 0 else "—"
     dur_c   = gcs.get("avg_session_duration", 0) or 0
-    components.html(kpi_html([
+    st.markdown(kpi_html([
         dict(label="工作階段",   value=f"{gs.get('sessions', 0):,}",
              delta=_chg_delta(gs.get("sessions", 0), gcs.get("sessions")),   color=GA4_PRIMARY),
         dict(label="網頁瀏覽數", value=f"{gs.get('pageviews', 0):,}",
@@ -1492,7 +1461,7 @@ with tab_ga4:
         dict(label="跳出率",     value=f"{gs.get('bounce_rate', 0):.1f}%",
              delta=_chg_delta(gs.get("bounce_rate", 0), gcs.get("bounce_rate")),
              color="#DC2626", inverse=True),
-    ], cols=7, card_bg="#FFFDF8"), height=160, scrolling=False)
+    ], cols=7, card_bg="#FFFDF8"), unsafe_allow_html=True)
 
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
 
