@@ -137,35 +137,6 @@ st.markdown("""<style>
 }
 </style>""", unsafe_allow_html=True)
 
-# ─── PASSWORD GATE ─────────────────────────────────────────────────────────────
-def _check_password():
-    try:
-        correct = st.secrets["auth"]["password"]
-    except Exception:
-        return True  # 本地無 secrets 設定時跳過驗證
-    if st.session_state.get("_authed"):
-        return True
-    st.markdown("""
-    <div style="max-width:380px;margin:80px auto;padding:40px;
-                background:#fff;border-radius:16px;
-                box-shadow:0 4px 24px rgba(0,0,0,.12);text-align:center">
-        <div style="font-size:28px;font-weight:800;color:#2D1F0F;margin-bottom:8px">采姸 CHAI YAN</div>
-        <div style="color:#8B7355;font-size:14px;margin-bottom:28px">廣告報表登入</div>
-    </div>
-    """, unsafe_allow_html=True)
-    col = st.columns([1, 2, 1])[1]
-    with col:
-        pw = st.text_input("請輸入密碼", type="password", key="_pw_input")
-        if st.button("進入報表", use_container_width=True):
-            if pw == correct:
-                st.session_state["_authed"] = True
-                st.rerun()
-            else:
-                st.error("密碼錯誤，請再試一次")
-    return False
-
-if not _check_password():
-    st.stop()
 
 try:
     from streamlit_autorefresh import st_autorefresh
