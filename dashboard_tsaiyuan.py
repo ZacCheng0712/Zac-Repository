@@ -28,23 +28,8 @@ st.set_page_config(
 # ─── GLOBAL CSS ───────────────────────────────────────────────────────────────
 st.markdown("""<style>
 #MainMenu, footer, [data-testid="stToolbar"] { display:none !important; }
-[data-testid="stSidebar"] > div:first-child { padding-top: 0 !important; }
 .main .block-container { padding: 1rem 2rem 3rem; max-width: 100%; }
 [data-testid="column"] > div:first-child { padding: 0 !important; }
-
-/* Sidebar collapse button */
-[data-testid="collapsedControl"] {
-    background: #4B5563 !important;
-    border-radius: 0 10px 10px 0 !important;
-    width: 30px !important; height: 60px !important;
-    top: 50% !important; transform: translateY(-50%) !important;
-    display: flex !important; align-items: center !important;
-    justify-content: center !important;
-    box-shadow: 3px 0 12px rgba(0,0,0,.20) !important;
-    z-index: 999 !important;
-}
-[data-testid="collapsedControl"] svg { fill: white !important; color: white !important; }
-[data-testid="collapsedControl"]:hover { background: #1F2937 !important; }
 
 /* Section headers */
 .sec-hd {
@@ -89,11 +74,6 @@ st.markdown("""<style>
     border-bottom: 3px solid #E8710A !important;
 }
 
-/* Sidebar */
-[data-testid="stSidebar"] {
-    background: #F0E5D0;
-    border-right: 1px solid #DDD0B8;
-}
 
 .stButton > button {
     background: #374151; color: white; border: none;
@@ -181,7 +161,6 @@ except ImportError:
 # ─── PALETTE ──────────────────────────────────────────────────────────────────
 BRAND_BLUE  = "#337AB7"
 BRAND_RED   = "#F62B2B"
-BRAND_DARK  = "#1E3A5F"
 GA4_PRIMARY = "#E8710A"
 GA4_AMBER   = "#F9AB00"
 ROAS_TARGET = 3.0
@@ -338,12 +317,6 @@ def _compute_dates(key, custom_s=None, custom_u=None):
         cs = s - relativedelta(months=1); cu = cs + timedelta(days=n)
     return s, u, cs, cu
 
-def date_range_for_preset(preset):
-    """Legacy wrapper → returns ISO strings."""
-    s, u, cs, cu = _compute_dates(preset)
-    return (s.strftime("%Y-%m-%d"), u.strftime("%Y-%m-%d"),
-            cs.strftime("%Y-%m-%d"), cu.strftime("%Y-%m-%d"))
-
 # ─── DATA LOADING ─────────────────────────────────────────────────────────────
 @st.cache_data(ttl=1800, show_spinner=False)
 def load_meta(since, until, cs, cu):
@@ -422,32 +395,6 @@ def kpi_html(cards, cols=7, card_bg="#FFFDF8"):
     )
 
 # ─── SPEND MINI CARD (lighter sky blue) ──────────────────────────────────────
-def spend_mini_html(spend, chg):
-    arr = "▲" if (chg or 0) > 0 else "▼"
-    chg_color = "#A7F3D0" if (chg or 0) > 0 else "#FCD34D"
-    chg_html = (
-        f'<div class="chg" style="color:{chg_color}">{arr} {abs(chg or 0):.1f}% vs 上期</div>'
-    ) if chg is not None else '<div class="chg" style="color:rgba(255,255,255,.55)">— 無比較</div>'
-    val_str = f"${spend:,.0f}"
-    return f"""<!DOCTYPE html><html><head><meta charset="utf-8">
-<style>
-*{{box-sizing:border-box;margin:0;padding:0}}
-body{{background:transparent;font-family:"PingFang TC","PingFang SC",-apple-system,sans-serif}}
-.card{{background:linear-gradient(135deg,#0369A1 0%,#0EA5E9 55%,#38BDF8 100%);
-       border-radius:14px;padding:16px 21px;
-       box-shadow:0 4px 20px rgba(3,105,161,.30)}}
-.lbl{{color:rgba(255,255,255,.75);font-size:11.5px;font-weight:700;
-      text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px}}
-.val{{color:#fff;font-size:30px;font-weight:900;letter-spacing:-.03em;line-height:1;margin-bottom:5px}}
-.chg{{font-size:14px;font-weight:700}}
-</style></head><body>
-<div class="card">
-  <div class="lbl">廣告花費</div>
-  <div class="val">{val_str}</div>
-  {chg_html}
-</div>
-</body></html>"""
-
 # ─── FUNNEL HTML ──────────────────────────────────────────────────────────────
 def funnel_html(stages):
     max_val = stages[0]["value"] if stages else 1
@@ -916,26 +863,6 @@ with _dp_col:
 # ══════════════════════════════════════════════════════════════════════════════
 # SIDEBAR（品牌資訊 + 刷新）
 # ══════════════════════════════════════════════════════════════════════════════
-with st.sidebar:
-    st.markdown(
-        f'''<div style="background:linear-gradient(135deg,#1F2937 0%,#374151 100%);
-                padding:20px 16px 16px;margin:-1rem -1rem 16px;text-align:center">
-  <div style="color:#fff;font-size:20px;font-weight:900;letter-spacing:-.01em">采姸 CHAI YAN</div>
-  <div style="color:rgba(255,255,255,.55);font-size:10px;letter-spacing:.12em;margin-top:2px">
-    SINCE 1991 · 廣告報表系統
-  </div>
-</div>''', unsafe_allow_html=True)
-    st.markdown(
-        f"<div style='font-size:12px;color:#8B7355;margin-bottom:8px'>"
-        f"📅 <b>{since}</b> ～ <b>{until}</b><br>"
-        f"<span style='font-size:11px'>比較：{compare_since} ～ {compare_until}</span></div>",
-        unsafe_allow_html=True,
-    )
-    st.markdown("---")
-    if st.button("↺ 刷新資料", key="sidebar_refresh"):
-        st.cache_data.clear()
-        st.rerun()
-    st.caption(f"更新：{datetime.now().strftime('%Y/%m/%d %H:%M')}")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # MAIN HEADER — 灰色漸層 + 中文標題 + 品牌 Logo
